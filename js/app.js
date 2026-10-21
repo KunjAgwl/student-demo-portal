@@ -183,8 +183,8 @@
     const tc = $('#topClock');
     if (tc) {
       const e = states[0];
-      tc.innerHTML = `<span class="status-dot ${e.w.open ? 'open' : 'closed'}"></span><span class="tc-label">New York</span><b>${fmt12(e.t.h, e.t.m)}</b>`;
-      tc.title = `Eastern time · window ${e.w.open ? 'open' : 'closed'} (${windowText})`;
+      tc.innerHTML = `<b>${fmt12(e.t.h, e.t.m)}</b><small>New York · <span class="${e.w.open ? 'is-open' : 'is-closed'}">${e.w.open ? 'texting open' : 'texting closed'}</span></small>`;
+      tc.title = `Eastern time · texting window ${windowText}, seller time`;
     }
   }
 
@@ -1075,27 +1075,48 @@
   /* ---------------------------------------------------------- sign in */
   function signIn() {
     const mins = D.modules.reduce((a, m) => a + parseInt(m.time, 10), 0);
-    return `<div class="signin">
-      <section class="signin-copy">
-        <a class="brand" href="#"><span class="brand-badge">${LOGO()}</span><span class="brand-text"><b>Guardian Angel</b><small>Acquisitions</small></span></a>
-        <h1 class="signin-title">The first voice a <span class="serif">seller</span> hears.</h1>
-        <p class="signin-quote">Students are the first people a property owner speaks to, so the quality of their replies decides how many conversations become deals.</p>
-        <ul class="signin-facts">
-          <li><b>7</b><span>sections</span></li>
-          <li><b>${(mins / 60).toFixed(1).replace('.0', '')} hrs</b><span>self paced training</span></li>
-          <li><b>4</b><span>access levels</span></li>
-        </ul>
+    const hrs = (mins / 60).toFixed(1).replace('.0', '');
+    const steps = [
+      ['Founder welcome video', '5 min'],
+      ['Company and mission', '30 min'],
+      ['US real estate basics', '60 min']
+    ];
+    return `<div class="login" id="app">
+      <section class="login-hero">
+        <div class="login-hero-top">
+          <span class="login-brand">${LOGO()}<span><b>Guardian Angel</b><small>Acquisitions · Student Portal</small></span></span>
+        </div>
+        <div class="login-copy">
+          <h1>The first voice a <em>seller</em> hears.</h1>
+          <p>Students are the first people a property owner speaks to, so the quality of their replies decides how many conversations become deals.</p>
+          <dl class="login-stats">
+            <div><dt>7</dt><dd>sections</dd></div>
+            <div><dt>${hrs} hrs</dt><dd>self paced</dd></div>
+            <div><dt>4</dt><dd>access levels</dd></div>
+          </dl>
+        </div>
       </section>
-      <div class="signin-card raised-lg">
-        <div class="medallion">${LOGO()}</div>
-        <h2>Student Portal</h2>
-        <p>Outreach associate onboarding</p>
-        <form data-form="signin">
-          <div><label class="label" for="nm">Your first name</label><input class="field" id="nm" name="name" required autocomplete="given-name" placeholder="e.g. Priya" maxlength="40"></div>
-          <button class="btn btn-primary" type="submit">Enter the portal ${icon('arrow')}</button>
-        </form>
-        <p class="signin-fine">Progress is saved in this browser.</p>
-      </div>
+
+      <section class="login-panel">
+        <div class="login-panel-top">
+          <button class="theme-switch" data-action="theme" aria-label="Toggle dark mode"><span class="knob">${icon('sun', 'ic-sun')}${icon('moon', 'ic-moon')}</span></button>
+        </div>
+        <div class="login-form">
+          <p class="eyebrow">Outreach associate onboarding</p>
+          <h2>Start your training</h2>
+          <p class="login-lede">Enter your first name to begin. Your progress saves in this browser, so you can pick up where you left off.</p>
+          <form data-form="signin">
+            <label class="label" for="nm">First name</label>
+            <input class="field" id="nm" name="name" required autocomplete="given-name" placeholder="e.g. Priya" maxlength="40">
+            <button class="btn btn-primary" type="submit"><span>Continue</span>${icon('arrow')}</button>
+          </form>
+          <div class="login-steps">
+            <span class="label">First up</span>
+            <ol>${steps.map(([t, m], i) => `<li><span class="n">${pad(i + 1)}</span><span>${t}</span><span class="m">${m}</span></li>`).join('')}</ol>
+          </div>
+        </div>
+        <div class="login-foot"><span>Guardian Angel Acquisitions</span></div>
+      </section>
     </div>`;
   }
 
@@ -1206,7 +1227,13 @@
 
   function render() {
     const root = $('#root');
-    if (!S.name) { root.innerHTML = signIn(); setTimeout(() => { const n = $('#nm'); if (n) n.focus(); }, 50); return; }
+    if (!S.name) {
+      root.innerHTML = signIn();
+      updateClocks();
+      syncThemeClass();
+      setTimeout(() => { const n = $('#nm'); if (n) n.focus(); }, 50);
+      return;
+    }
     root.innerHTML = shell() + '<div class="toast" id="toast" role="status"></div>';
     syncThemeClass();
     renderView();
