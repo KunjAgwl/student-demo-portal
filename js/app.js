@@ -8,7 +8,7 @@
   /* ---------------------------------------------------------------- state */
   const blank = () => ({
     name: '', joined: null, done: {}, seen: [], quiz: null, signoff: null,
-    sim: {}, tickets: [], scenarios: [], unanswered: [], neverOpen: true, vars: {}, sit: 'preforeclosure'
+    sim: {}, tickets: [], scenarios: [], unanswered: [], vars: {}, sit: 'preforeclosure'
   });
   let S = blank();
   try {
@@ -364,12 +364,22 @@
       </div>
     </header>
 
-    <section class="card pinned${S.neverOpen ? ' open' : ''}" id="pinned">
-      <button class="pinned-head" data-action="never-toggle" aria-expanded="${S.neverOpen}">
+    <div class="grid-2">
+      <section class="card">
+        <div class="card-head"><div><h2>Announcements</h2><p>Policy changes, new replies and rule updates land here first.</p></div></div>
+        <ul class="notes">${D.announcements.map((a) => `<li><time>${fmtDate(a.date)}</time><h3>${esc(a.title)}</h3><p>${esc(a.body)}</p></li>`).join('')}</ul>
+      </section>
+      <section class="card scenario-card">
+        <div class="card-head"><div><h2>Today’s scenario</h2><p>One short scenario a day. Think of your reply, then flip.</p></div></div>
+        ${flipCard(daily)}
+      </section>
+    </div>
+
+    <section class="card pinned mt" id="pinned">
+      <div class="pinned-head">
         <span class="pin">${icon('pin')}</span>
         <span class="grow"><h3>Never do this</h3><p>Pinned for every student. Signed before live access.</p></span>
-        ${icon('chev', 'chev')}
-      </button>
+      </div>
       <div class="pinned-body">
         <ol class="never-mini">${D.neverDo.map((n, i) => `<li><span>${pad(i + 1)}</span>${esc(n)}</li>`).join('')}</ol>
       </div>
@@ -378,7 +388,7 @@
     <section class="card clocks-card mt" id="clocks">
       <div class="card-head">
         <div><h2>Seller local time</h2><p>Check the seller’s clock before every message. The gold arc is the permitted window: ${windowText} in their time zone.</p></div>
-        <span class="chip is-gold" title="${esc(D.window.note)}">${icon('info')}Window set by counsel</span>
+        <span class="counsel-note" title="${esc(D.window.note)}">${icon('info')}Window set by counsel</span>
       </div>
       <div class="dials">${D.zones.map((z) => dialHTML(z)).join('')}${dialHTML(D.home, true)}</div>
       <div class="converter">
@@ -400,21 +410,18 @@
       </section>
       <section class="card">
         <div class="card-head"><div><h2>Access levels</h2><p>You earn live access in stages.</p></div><a class="btn btn-sm" href="#/training" data-anchor="levels">Details</a></div>
-        <div class="ladder">${D.levels.map((l, i) => `<div class="rung${i === 0 ? ' is-current' : ''}"><span class="rn">L${i + 1}</span><b>${esc(l.name)}</b><small>${esc(l.access)}</small></div>`).join('')}</div>
-        <p class="ladder-note">To move up: ${esc(D.levels[0].up.toLowerCase())}.</p>
+        <ol class="lv-list">${D.levels.map((l, i) => `<li class="lv${i === 0 ? ' is-current' : ''}">
+          <span class="lv-n">${i + 1}</span>
+          <div class="lv-body">
+            <div class="lv-top"><b>${esc(l.name)}</b>${i === 0 ? '<em>Your level</em>' : ''}</div>
+            <p>${esc(l.access)}</p>
+            ${i === 0 ? `<small>To move up: ${esc(l.up.toLowerCase())}.</small>` : ''}
+          </div></li>`).join('')}</ol>
+        <p class="ladder-note">A compliance breach at the independent level sends a student back to supervised work for a fixed period.</p>
       </section>
     </div>
 
-    <div class="grid-2 mt">
-      <section class="card">
-        <div class="card-head"><div><h2>Announcements</h2><p>Policy changes, new replies and rule updates land here first.</p></div></div>
-        <ul class="notes">${D.announcements.map((a) => `<li><time>${fmtDate(a.date)}</time><h3>${esc(a.title)}</h3><p>${esc(a.body)}</p></li>`).join('')}</ul>
-      </section>
-      <section class="card">
-        <div class="card-head"><div><h2>Today’s scenario</h2><p>One short scenario a day. Think of your reply, then flip.</p></div></div>
-        ${flipCard(daily)}
-      </section>
-    </div>`;
+`;
   }
 
   function flipCard(r) {
@@ -1323,11 +1330,6 @@
       case 'menu': $('#app').classList.add('nav-open'); break;
       case 'menu-close': $('#app').classList.remove('nav-open'); break;
       case 'toast': toast(el.dataset.msg, 'info'); break;
-      case 'never-toggle': {
-        S.neverOpen = !S.neverOpen; save();
-        const p = $('#pinned'); p.classList.toggle('open', S.neverOpen); el.setAttribute('aria-expanded', S.neverOpen);
-        break;
-      }
       case 'flip': el.classList.toggle('flipped'); break;
       case 'shuffle': renderCards(); break;
       case 'sit': S.sit = el.dataset.id; save(); renderSituation(); break;
