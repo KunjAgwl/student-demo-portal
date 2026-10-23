@@ -1091,7 +1091,7 @@
     return `<div class="login" id="app">
       <section class="login-hero">
         <div class="login-hero-top">
-          <span class="login-brand">${LOGO()}<span><b>Guardian Angel</b><small>Acquisitions · Student Portal</small></span></span>
+          <span class="login-brand"><span class="login-brand-badge">${LOGO()}</span><span><b>Guardian Angel</b><small>Acquisitions · Student Portal</small></span></span>
         </div>
         <div class="login-copy">
           <h1>The first voice a <em>seller</em> hears.</h1>
@@ -1248,15 +1248,10 @@
 
   /* ------------------------------------------------------------- theme */
   function currentTheme() {
-    const t = document.documentElement.getAttribute('data-theme');
-    if (t) return t;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // White is the default; dark only when the student switches it on.
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
   function syncThemeClass() { const a = $('#app'); if (a) a.classList.toggle('is-dark', currentTheme() === 'dark'); }
-  if (window.matchMedia) {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(syncThemeClass);
-  }
 
   /* ----------------------------------------------------------- palette */
   let palSel = 0, palRes = [];
